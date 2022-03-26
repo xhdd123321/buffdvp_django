@@ -2,9 +2,12 @@ import datetime
 
 from django.apps import apps
 from django.contrib.sessions.models import Session
+from django.http import FileResponse
+from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from buff_echart.analyzers import Analyzer
 from buff_user.permissions import IsOwner
 from common.Mypagination import MyPageNumberPagination
 from utils.statistics_utils import get_site_runtime, get_site_onlineCount, get_registered_count, get_cpu_info, \
@@ -53,6 +56,23 @@ class ChartModelViewSet(mixins.CreateModelMixin,
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+
+    """
+    导出图表
+    """
+    @action(methods=['get'], detail=True)
+    def export(self, request, *args, **kwargs):
+        instance = self.get_object()
+        ana = Analyzer(instance)
+        type = request.query_params.get('type')
+        if type == 'excel':
+            path = ana.export_to_excel()
+        elif type == 'csv':
+            path = ana.export_to_csv()
+        else:
+            return Response("类型不支持", status=status.HTTP_400_BAD_REQUEST)
+        response = FileResponse(open(path, 'rb'))
+        return response
 
 
 class DashBoardView(APIView):

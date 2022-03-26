@@ -5,10 +5,14 @@
 # @File    : Analyzer.py
 # @Software: PyCharm
 # @Description: Analyzer
+import os
+from io import BytesIO
+
 import pandas as pd
 from pandas import DataFrame
 
 from buff_data.models import Chart
+from buffdvp_django.settings import MEDIA_ROOT
 
 
 class Analyzer:
@@ -23,6 +27,16 @@ class Analyzer:
         header = self.chart.header
         self.df = pd.DataFrame(body, columns=header)
         print(self.df)
+
+    def export_to_excel(self):
+        path = os.path.join(MEDIA_ROOT, 'export', self.chart.title + '.xlsx')
+        self.df.to_excel(path, index=False)
+        return path
+
+    def export_to_csv(self):
+        path = os.path.join(MEDIA_ROOT, 'export', self.chart.title + '.csv')
+        self.df.to_csv(path, index=False)
+        return path
 
     def analysis_by_count(self):
         df = self.df
