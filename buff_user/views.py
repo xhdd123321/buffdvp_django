@@ -3,6 +3,8 @@ from django.contrib.auth import authenticate, login, logout
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework import viewsets, permissions, status
 from rest_framework.authentication import SessionAuthentication
+from rest_framework.decorators import action
+from rest_framework.exceptions import ValidationError
 from rest_framework.filters import OrderingFilter
 from rest_framework.permissions import AllowAny, IsAdminUser
 from rest_framework.response import Response
@@ -13,7 +15,7 @@ from utils.MyResponse import MyResponse
 from .apps import BuffUserConfig as AppConfig
 from .models import User
 from .permissions import IsUser
-from .serializers import UserSerializer, CreateUserSerializer, UserListSerializer
+from .serializers import UserSerializer, CreateUserSerializer, UserListSerializer, UserChangePasswordSerializer
 
 app_config = apps.get_app_config(AppConfig.name)
 
@@ -45,6 +47,8 @@ class UserModelViewSet(viewsets.ModelViewSet):
             return CreateUserSerializer
         elif self.action == 'list':
             return UserListSerializer
+        elif self.action == 'changePassword':
+            return UserChangePasswordSerializer
         else:
             return UserSerializer
 
@@ -60,6 +64,22 @@ class UserModelViewSet(viewsets.ModelViewSet):
     def perform_destroy(self, instance):
         instance.image.delete(save=False)
         instance.delete()
+
+    """
+    修改密码
+    """
+    @action(methods=['post'], detail=True)
+    def changePassword(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        new_password = serializer.validated_data['new_password']
+        old_password = serializer.validated_data['old_password']
+        if not instance.check_password(old_password):
+            raise ValidationError('旧密码不正确')
+        instance.set_password(new_password)
+        instance.save()
+        return Response("密码修改成功", status=status.HTTP_200_OK)
 
 
 class LoginView(APIView):

@@ -15,14 +15,16 @@ from .models import User
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('id', 'username', 'nick_name', 'gender', 'mobile', 'email', 'image', 'user_type', 'is_superuser', 'date_joined')
+        fields = (
+        'id', 'username', 'nick_name', 'gender', 'mobile', 'email', 'image', 'user_type', 'is_superuser', 'date_joined')
         read_only_fields = ('username', 'user_type', 'is_superuser', 'date_joined')
 
 
 class UserListSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('id', 'username', 'nick_name', 'gender', 'mobile', 'email', 'image', 'user_type', 'last_login', 'is_superuser')
+        fields = (
+        'id', 'username', 'nick_name', 'gender', 'mobile', 'email', 'image', 'user_type', 'last_login', 'is_superuser')
 
 
 class CreateUserSerializer(serializers.ModelSerializer):
@@ -46,6 +48,23 @@ class CreateUserSerializer(serializers.ModelSerializer):
         password = attrs.get('password')
         re_password = attrs.get('re_password')
         if not password == re_password:
+            raise ValidationError('两次密码不一致')
+        attrs.pop('re_password')  # re_password不存数据库，剔除
+        return attrs
+
+
+class UserChangePasswordSerializer(serializers.Serializer):
+    old_password = serializers.CharField(max_length=128, required=True, write_only=True)
+    new_password = serializers.CharField(max_length=128, required=True, write_only=True)
+    re_password = serializers.CharField(max_length=128, required=True, write_only=True)
+
+    class Meta:
+        fields = ("old_password", "new_password", "re_password")
+
+    def validate(self, attrs):
+        new_password = attrs.get('new_password')
+        re_password = attrs.get('re_password')
+        if not new_password == re_password:
             raise ValidationError('两次密码不一致')
         attrs.pop('re_password')  # re_password不存数据库，剔除
         return attrs
