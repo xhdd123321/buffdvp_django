@@ -6,6 +6,7 @@
 # @Software: PyCharm
 # @Description: Analyzer
 import os
+from heapq import heappush, heapreplace
 from io import BytesIO
 
 import pandas as pd
@@ -38,20 +39,69 @@ class Analyzer:
         self.df.to_csv(path, index=False)
         return path
 
+    def analysis_describe(self):
+        df = self.df
+        describe = df.describe()
+        index_list = describe.index.values.tolist()
+        header_list = ['title'] + index_list
+
+        body_list = []
+        describe_dict = describe.to_dict()
+        for key in describe_dict.keys():
+            describe_dict[key]['title'] = key
+            _dict = describe_dict[key]
+            body_list.append(_dict)
+        res = {
+            'header': header_list,
+            'body': body_list
+        }
+        return res
+
     def analysis_by_count(self):
         df = self.df
         res = list()
         for column in df.columns.tolist():
             if not df[column].is_unique:
-                print(df[column].unique())
-                print(df.groupby(column).size())
-                print(df.groupby(column).size().to_dict())
+                # print(df[column].unique())
+                # print(df.groupby(column).size())
+                # print(df.groupby(column).size().to_dict())
                 res.append((df.groupby(column).size().to_dict(), column))
         return res
 
     def analysis_by_twocol(self):
         df = self.df
-        print(df.dtypes)
+        corr = df.corr()
+        row_len = corr.shape[0]
+        col_len = corr.shape[1]
+        heap = []
+        for i in range(0, row_len):
+            cur_row = corr.iloc[i]
+            for j in range(i + 1, col_len):
+                x = cur_row[j]
+                if len(heap) < 3:
+                    heappush(heap, x)
+                else:
+                    if heap[0] < x:
+                        heapreplace(heap, x)
+        index = 0
+        header_list = corr.columns.values.tolist()
+        res = []
+        for i in range(0, row_len):
+            cur_row = corr.iloc[i]
+            for j in range(i + 1, col_len):
+                x = cur_row[j]
+                if x in heap:
+                    heap.remove(x)
+                    _dict = {
+                        header_list[i]: df[header_list[i]].to_list(),
+                        header_list[j]: df[header_list[j]].to_list()
+                    }
+                    res.append(_dict)
+        return res
+
+
+
+
 
 
 

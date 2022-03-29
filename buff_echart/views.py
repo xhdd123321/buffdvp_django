@@ -3,7 +3,7 @@ from random import randrange
 
 from django.apps import apps
 from django.http import HttpResponse, JsonResponse
-from pyecharts.charts import Bar, Page, Pie
+from pyecharts.charts import Bar, Page, Pie, Scatter
 from rest_framework import permissions
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.exceptions import NotFound
@@ -48,9 +48,9 @@ def bar_by_two_list(one: list, two: list, title: str) -> Bar:
             .add_xaxis(one)
             .add_yaxis("count", two)
             .set_global_opts(
-                title_opts=opts.TitleOpts(title="Bar-{0}".format(title), subtitle="count统计表"),
-                toolbox_opts=opts.ToolboxOpts(feature=toolbox_opts),
-            )
+            title_opts=opts.TitleOpts(title="Bar-{0}".format(title), subtitle="count统计表"),
+            toolbox_opts=opts.ToolboxOpts(feature=toolbox_opts),
+        )
     )
     return c.dump_options_with_quotes()
 
@@ -84,6 +84,21 @@ def pie_by_two_list(one: list, two: list, title: str) -> Pie:
                 trigger="item", formatter="{a} <br/>{b}: {c} ({d}%)"
             ),
             label_opts=opts.LabelOpts(color="rgba(255, 255, 255, 0.3)"),
+        )
+    )
+    return c.dump_options_with_quotes()
+
+
+def scatter_by_two_list(one: list, two: list, title_one: str, title_two: str) -> Bar:
+    c = (
+        Scatter()
+        .add_xaxis(one)
+        .add_yaxis("", two)
+        .set_global_opts(
+            title_opts=opts.TitleOpts(title="Scatter-{0}&{1}".format(title_one, title_two)),
+            xaxis_opts=opts.AxisOpts(name=title_one, is_scale=True, type_="value", splitline_opts=opts.SplitLineOpts(is_show=True)),
+            yaxis_opts=opts.AxisOpts(name=title_two, is_scale=True, type_="value", splitline_opts=opts.SplitLineOpts(is_show=True)),
+            toolbox_opts=opts.ToolboxOpts(feature=toolbox_opts),
         )
     )
     return c.dump_options_with_quotes()
@@ -123,9 +138,23 @@ class EchartViewSet(GenericViewSet):
             bar_list.append(bar)
             pie_list.append(pie)
 
+        scatter_list = list()
+        res_list_two = ana.analysis_by_twocol()
+        for item in res_list_two:
+            key_list = list(item.keys())
+            a_title = key_list[0]
+            a_list = item[a_title]
+            b_title = key_list[1]
+            b_list = item[b_title]
+            scatter = json.loads(scatter_by_two_list(a_list, b_list, a_title, b_title))
+            scatter_list.append(scatter)
+
+        describe = ana.analysis_describe()
         res = {
             "bar_list": bar_list,
-            "pie_list": pie_list
+            "pie_list": pie_list,
+            "scatter_list": scatter_list,
+            "describe": describe,
         }
         return Response(res)
 
