@@ -6,6 +6,7 @@ from django.http import HttpResponse, JsonResponse
 from pyecharts.charts import Bar, Page, Pie, Scatter
 from rest_framework import permissions
 from rest_framework.authentication import SessionAuthentication
+from rest_framework.decorators import action
 from rest_framework.exceptions import NotFound
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -157,6 +158,52 @@ class EchartViewSet(GenericViewSet):
             "describe": describe,
         }
         return Response(res)
+
+class AnalyzerCountView(APIView):
+    """
+    分析数据
+    """
+    permission_classes = (permissions.AllowAny,)
+    serializer_class = EchartSerializer
+
+    # throttle_scope = "requests"
+    def post(self, request, *args, **kwargs):
+        serializer = EchartSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        chart_id = serializer.validated_data['chart_id']
+        try:
+            chart_obj = Chart.objects.get(id=chart_id)
+        except Chart.DoesNotExist:
+            raise NotFound("待分析图表不存在")
+        ana = Analyzer(chart_obj)
+        res_list = []
+        for item in ana.analysis_by_count():
+            title = item[1]
+            content_dict = item[0]
+            res_list.append({
+                'title': title,
+                'content': content_dict
+            })
+        return Response(res_list)
+
+class AnalyzerListView(APIView):
+    """
+    分析数据
+    """
+    permission_classes = (permissions.AllowAny,)
+    serializer_class = EchartSerializer
+
+    # throttle_scope = "requests"
+    def post(self, request, *args, **kwargs):
+        serializer = EchartSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        chart_id = serializer.validated_data['chart_id']
+        try:
+            chart_obj = Chart.objects.get(id=chart_id)
+        except Chart.DoesNotExist:
+            raise NotFound("待分析图表不存在")
+        ana = Analyzer(chart_obj)
+        return Response(ana.analysis_by_twocol())
 
 
 class IndexView(APIView):
