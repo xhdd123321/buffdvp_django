@@ -1,6 +1,9 @@
+import io
+import os
+
 from django.apps import apps
 from django.contrib.auth import authenticate, login, logout
-from django.views.decorators.csrf import csrf_exempt
+from django.core.files import File
 from rest_framework import viewsets, permissions, status
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.decorators import action
@@ -10,8 +13,11 @@ from rest_framework.permissions import AllowAny, IsAdminUser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from buff_file import models
+from buffdvp_django.settings import MEDIA_ROOT
 from common.Mypagination import MyPageNumberPagination
 from utils.MyResponse import MyResponse
+from utils.path_utils import get_filepath_filename_extension
 from .apps import BuffUserConfig as AppConfig
 from .models import User
 from .permissions import IsUser
@@ -64,6 +70,19 @@ class UserModelViewSet(viewsets.ModelViewSet):
     def perform_destroy(self, instance):
         instance.image.delete(save=False)
         instance.delete()
+
+    def perform_create(self, serializer):
+        serializer.save()
+        path = os.path.join(MEDIA_ROOT, 'example', '示例表格.xlsx')
+        with open(path, 'rb') as f:
+            file = models.File(user=serializer.instance)
+            file.file.save('示例表格.xlsx', File(f))
+            file_url = file.file.name
+            filepath, basename, extension = get_filepath_filename_extension(file_url)
+            file.name = basename
+            file.type = extension
+            file.save()
+
 
     """
     修改密码

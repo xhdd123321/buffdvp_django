@@ -45,6 +45,6 @@ class FileModelViewSet(mixins.CreateModelMixin,
         serializer.save(user=self.request.user)
 
     def perform_destroy(self, instance):
-        if instance.file is not None:
-            instance.file.delete(save=False)
+        # if instance.file is not None:
+        #     instance.file.delete(save=False)
         instance.delete()

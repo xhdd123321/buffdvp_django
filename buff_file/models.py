@@ -1,7 +1,10 @@
+import os
+
 from django.contrib.auth import get_user_model
-from django.db.models.signals import pre_delete
+from django.db.models.signals import pre_delete, post_delete
 from django.dispatch import receiver
 
+from utils.path_utils import get_filepath_filename_extension
 from .apps import BuffFileConfig as BuffConfig
 from django.db import models
 
@@ -26,3 +29,13 @@ class File(models.Model):
 
     def __str__(self):
         return self.name
+
+@receiver(post_delete, sender=File)
+def delete_upload_files(sender, instance, **kwargs):
+        file = getattr(instance, 'file', '')
+        if not file:
+            return
+        filepath, filename, extension = get_filepath_filename_extension(file.path)
+        file.delete(save=False)
+        if os.path.isdir(filepath) and not os.listdir(filepath):
+            os.rmdir(filepath)

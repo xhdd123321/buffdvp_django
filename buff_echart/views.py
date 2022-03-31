@@ -4,9 +4,7 @@ from random import randrange
 from django.apps import apps
 from django.http import HttpResponse, JsonResponse
 from pyecharts.charts import Bar, Page, Pie, Scatter
-from rest_framework import permissions
-from rest_framework.authentication import SessionAuthentication
-from rest_framework.decorators import action
+from rest_framework import permissions, status
 from rest_framework.exceptions import NotFound
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -110,7 +108,7 @@ class EchartViewSet(GenericViewSet):
     返回 echart生成 数据
     """
     serializer_class = EchartSerializer
-    permission_classes = (permissions.AllowAny,)
+    permission_classes = (permissions.IsAuthenticated,)
     pagination_class = MyPageNumberPagination
 
     # authentication_classes = (JWTAuthentication,)
@@ -123,6 +121,9 @@ class EchartViewSet(GenericViewSet):
             chart_obj = Chart.objects.get(id=chart_id)
         except Chart.DoesNotExist:
             raise NotFound("待分析图表不存在")
+
+        if (not request.user.is_superuser) and chart_obj.user != request.user:
+            return Response("You do not have permission to perform this action.", status=status.HTTP_403_FORBIDDEN)
 
         # 生成数据
         bar_list = list()
@@ -163,7 +164,7 @@ class AnalyzerCountView(APIView):
     """
     分析数据
     """
-    permission_classes = (permissions.AllowAny,)
+    permission_classes = (permissions.IsAuthenticated,)
     serializer_class = EchartSerializer
 
     # throttle_scope = "requests"
@@ -175,6 +176,10 @@ class AnalyzerCountView(APIView):
             chart_obj = Chart.objects.get(id=chart_id)
         except Chart.DoesNotExist:
             raise NotFound("待分析图表不存在")
+
+        if (not request.user.is_superuser) and chart_obj.user != request.user:
+            return Response("You do not have permission to perform this action.", status=status.HTTP_403_FORBIDDEN)
+
         ana = Analyzer(chart_obj)
         res_list = []
         for item in ana.analysis_by_count():
@@ -190,7 +195,7 @@ class AnalyzerListView(APIView):
     """
     分析数据
     """
-    permission_classes = (permissions.AllowAny,)
+    permission_classes = (permissions.IsAuthenticated,)
     serializer_class = EchartSerializer
 
     # throttle_scope = "requests"
@@ -202,6 +207,10 @@ class AnalyzerListView(APIView):
             chart_obj = Chart.objects.get(id=chart_id)
         except Chart.DoesNotExist:
             raise NotFound("待分析图表不存在")
+
+        if (not request.user.is_superuser) and chart_obj.user != request.user:
+            return Response("You do not have permission to perform this action.", status=status.HTTP_403_FORBIDDEN)
+
         ana = Analyzer(chart_obj)
         return Response(ana.analysis_by_twocol())
 
