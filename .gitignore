@@ -158,6 +158,8 @@ cython_debug/
 *.iml
 out
 gen
-!/media/example/
-/media/
 /uwsgi.ini
+!/media/example/
+/media/avatars/
+/media/export/
+/media/files/
