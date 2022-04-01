@@ -82,3 +82,8 @@ python manage.py runserver
 # or
 python manage.py runserver 0.0.0.0:8000
 ```
+
+### 7 创建管理员用户
+```shell
+python manage.py createsuperuser
+```
