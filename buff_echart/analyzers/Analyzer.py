@@ -9,6 +9,7 @@ import os
 from heapq import heappush, heapreplace
 from io import BytesIO
 
+import numpy as np
 import pandas as pd
 from pandas import DataFrame
 
@@ -97,6 +98,21 @@ class Analyzer:
                         header_list[j]: df[header_list[j]].to_list()
                     }
                     res.append(_dict)
+        return res
+
+    def analysis_by_compare(self):
+        df = self.df
+        res = []
+
+        key_col = []
+        value_col = []
+        for column in df.columns.tolist():
+            if not df[column].is_unique:
+                key_col.append({column: df[column].to_list()})
+            if np.issubdtype(df[column].dtype, np.number):
+                value_col.append({column: df[column].to_list()})
+        res.append(key_col)
+        res.append(value_col)
         return res
 
 

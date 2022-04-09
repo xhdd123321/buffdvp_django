@@ -9,7 +9,7 @@
 from rest_framework import routers
 from django.urls import include, path
 from . import views
-from .views import EchartViewSet, AnalyzerCountView, AnalyzerListView
+from .views import EchartViewSet, AnalyzerCountView, AnalyzerListView, AnalyzerCompareView
 
 router = routers.DefaultRouter()
 router.register(r'echart', EchartViewSet, basename="echart")
@@ -20,5 +20,6 @@ urlpatterns = [
     path('', include(router.urls)),
     path('ana/count/', AnalyzerCountView.as_view()),
     path('ana/list/', AnalyzerListView.as_view()),
+    path('ana/compare/', AnalyzerCompareView.as_view()),
     path('index/', views.IndexView.as_view(), name='echart_demo'),
 ]

@@ -214,6 +214,32 @@ class AnalyzerListView(APIView):
         ana = Analyzer(chart_obj)
         return Response(ana.analysis_by_twocol())
 
+class AnalyzerCompareView(APIView):
+    """
+    分析对比数据
+    """
+    permission_classes = (permissions.IsAuthenticated,)
+    serializer_class = EchartSerializer
+
+    # throttle_scope = "requests"
+    def post(self, request, *args, **kwargs):
+        serializer = EchartSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        chart_id = serializer.validated_data['chart_id']
+        try:
+            chart_obj = Chart.objects.get(id=chart_id)
+        except Chart.DoesNotExist:
+            raise NotFound("待分析图表不存在")
+
+        if (not request.user.is_superuser) and chart_obj.user != request.user:
+            return Response("You do not have permission to perform this action.", status=status.HTTP_403_FORBIDDEN)
+
+        ana = Analyzer(chart_obj)
+        res_dict = {}
+        compare_list = ana.analysis_by_compare()
+        res_dict['key_list'] = compare_list[0]
+        res_dict['content_list'] = compare_list[1]
+        return Response(res_dict)
 
 class IndexView(APIView):
     def get(self, request, *args, **kwargs):
