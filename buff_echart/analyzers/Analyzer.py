@@ -107,7 +107,7 @@ class Analyzer:
         key_col = []
         value_col = []
         for column in df.columns.tolist():
-            if not df[column].is_unique:
+            if df[column].is_unique:
                 key_col.append({column: df[column].to_list()})
             if np.issubdtype(df[column].dtype, np.number):
                 value_col.append({column: df[column].to_list()})
