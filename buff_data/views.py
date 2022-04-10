@@ -69,6 +69,10 @@ class ChartModelViewSet(mixins.CreateModelMixin,
             path = ana.export_to_excel()
         elif type == 'csv':
             path = ana.export_to_csv()
+        elif type == 'txt':
+            path = ana.export_to_txt()
+        elif type == 'json':
+            path = ana.export_to_json()
         else:
             return Response("类型不支持", status=status.HTTP_400_BAD_REQUEST)
         response = FileResponse(open(path, 'rb'))

@@ -28,7 +28,7 @@ class Analyzer:
         body = self.chart.body
         header = self.chart.header
         self.df = pd.DataFrame(body, columns=header)
-        print(self.df)
+        # print(self.df)
 
     def export_to_excel(self):
         path = os.path.join(MEDIA_ROOT, 'export', self.chart.title + '.xlsx')
@@ -38,6 +38,16 @@ class Analyzer:
     def export_to_csv(self):
         path = os.path.join(MEDIA_ROOT, 'export', self.chart.title + '.csv')
         self.df.to_csv(path, index=False)
+        return path
+
+    def export_to_txt(self):
+        path = os.path.join(MEDIA_ROOT, 'export', self.chart.title + '.txt')
+        self.df.to_csv(path, index=False)
+        return path
+
+    def export_to_json(self):
+        path = os.path.join(MEDIA_ROOT, 'export', self.chart.title + '.json')
+        self.df.to_json(path)
         return path
 
     def analysis_describe(self):

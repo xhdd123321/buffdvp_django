@@ -17,6 +17,7 @@ from common.Mypagination import MyPageNumberPagination
 from .analyzers import Analyzer
 from .apps import BuffEchartConfig as AppConfig
 from .serializers import EchartSerializer
+from django.core.cache import cache
 
 app_config = apps.get_app_config(AppConfig.name)
 
@@ -117,6 +118,13 @@ class EchartViewSet(GenericViewSet):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         chart_id = serializer.validated_data['chart_id']
+        # 读取缓存
+        cache_key = 'ana_echart_chart_id_' + str(chart_id)
+        cache_res = cache.get(cache_key)
+        if cache_res:
+            cache_res['cache'] = True
+            return Response(cache_res)
+
         try:
             chart_obj = Chart.objects.get(id=chart_id)
         except Chart.DoesNotExist:
@@ -158,6 +166,9 @@ class EchartViewSet(GenericViewSet):
             "scatter_list": scatter_list,
             "describe": describe,
         }
+        # 设置缓存
+        cache.set(cache_key, res, timeout=10)
+        res['cache'] = False
         return Response(res)
 
 class AnalyzerCountView(APIView):
@@ -226,6 +237,13 @@ class AnalyzerCompareView(APIView):
         serializer = EchartSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         chart_id = serializer.validated_data['chart_id']
+        # 读取缓存
+        cache_key = 'ana_compare_chart_id_' + str(chart_id)
+        cache_res = cache.get(cache_key)
+        if cache_res:
+            cache_res['cache'] = True
+            return Response(cache_res)
+
         try:
             chart_obj = Chart.objects.get(id=chart_id)
         except Chart.DoesNotExist:
@@ -239,6 +257,9 @@ class AnalyzerCompareView(APIView):
         compare_list = ana.analysis_by_compare()
         res_dict['key_list'] = compare_list[0]
         res_dict['content_list'] = compare_list[1]
+        # 设置缓存
+        cache.set(cache_key, res_dict, timeout=10)
+        res_dict['cache'] = False
         return Response(res_dict)
 
 class IndexView(APIView):

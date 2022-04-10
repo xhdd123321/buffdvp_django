@@ -11,6 +11,7 @@ from .CsvExtractor import CsvExtractor
 from .ExcelExtractor import ExcelExtractor
 from buff_file.models import File
 from .Extractor import Extractor
+from .JsonExtractor import JsonExtractor
 from .WordExtractor import WordExtractor
 
 
@@ -22,8 +23,10 @@ class ExtractorController:
             ext = ExcelExtractor(file)
         elif file_type in ('.docx',):
             ext = WordExtractor(file)
-        elif file_type in ('.csv',):
+        elif file_type in ('.csv', '.txt'):
             ext = CsvExtractor(file)
+        elif file_type in ('.json',):
+            ext = JsonExtractor(file)
         else:
             raise ParseError("无法提取该类型文件")
         return ext
