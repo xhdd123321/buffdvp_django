@@ -34,6 +34,16 @@ class AnaTests(APITestCase, URLPatternsTestCase):
         resp = self.client.post(self.user_url + 'login/', form, format='json')
         return resp
 
+    def do_ana_count(self, chart_id):
+        form = {'chart_id': chart_id}
+        resp = self.client.post(self.base_url + 'ana/count/', form, format='json')
+        return resp
+
+    def do_ana_list(self, chart_id):
+        form = {'chart_id': chart_id}
+        resp = self.client.post(self.base_url + 'ana/list/', form, format='json')
+        return resp
+
     def do_ana_compare(self, chart_id):
         form = {'chart_id': chart_id}
         resp = self.client.post(self.base_url + 'ana/compare/', form, format='json')
@@ -43,6 +53,38 @@ class AnaTests(APITestCase, URLPatternsTestCase):
         form = {'chart_id': chart_id}
         resp = self.client.post(self.base_url + 'echart/', form, format='json')
         return resp
+
+    def test_ehcart_create(self):
+        echart_id = 41
+        resp = self.do_ehcart_create(echart_id)
+        self.assertEqual(resp.status_code, status.HTTP_401_UNAUTHORIZED)
+        self.do_login_admin()
+        resp = self.do_ehcart_create(echart_id)
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+
+    def test_ana_count(self):
+        echart_id = 41
+        resp = self.do_ana_compare(echart_id)
+        self.assertEqual(resp.status_code, status.HTTP_401_UNAUTHORIZED)
+        self.do_login_admin()
+        resp = self.do_ana_compare(echart_id)
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+
+    def test_ana_list(self):
+        echart_id = 41
+        resp = self.do_ana_list(echart_id)
+        self.assertEqual(resp.status_code, status.HTTP_401_UNAUTHORIZED)
+        self.do_login_admin()
+        resp = self.do_ana_list(echart_id)
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+
+    def test_ana_compare(self):
+        echart_id = 41
+        resp = self.do_ana_compare(echart_id)
+        self.assertEqual(resp.status_code, status.HTTP_401_UNAUTHORIZED)
+        self.do_login_admin()
+        resp = self.do_ana_compare(echart_id)
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
 
     def test_cache_ehcart_create(self):
         echart_id = 41

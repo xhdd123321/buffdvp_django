@@ -1,1 +1,1 @@
-from .FileTests import FileTests
+from .FileTests import FileTests as FileTest

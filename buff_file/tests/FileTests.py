@@ -126,21 +126,24 @@ class FileTests(UserTestCase, URLPatternsTestCase):
         self.assertEqual(resp.status_code, status.HTTP_401_UNAUTHORIZED)
         # 普通用户 创建文件 查列表
         self.do_login(**self.test_user)
-        self.do_file_create(self.test_file_path)
         resp = self.do_file_list()
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         self.assertEqual(resp.data.get('count'), 1)
+        self.do_file_create(self.test_file_path)
+        resp = self.do_file_list()
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        self.assertEqual(resp.data.get('count'), 2)
         # 管理员 创建文件 查列表
         self.do_login(**self.admin_user)
         self.do_file_create(self.test_file_path)
         resp = self.do_file_list()
-        self.assertEqual(resp.data.get('count'), 2)
+        self.assertEqual(resp.data.get('count'), 3)
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         # 普通用户 查列表
         self.do_login(**self.test_user)
         resp = self.do_file_list()
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
-        self.assertEqual(resp.data.get('count'), 1)
+        self.assertEqual(resp.data.get('count'), 2)
 
     def test_file_update(self):
         """
