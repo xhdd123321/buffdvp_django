@@ -164,3 +164,4 @@ gen
 /media/export/
 /media/files/
 /buff_echart/fixtures/testDB.json
+/buffdvp_django/secret_settings.py

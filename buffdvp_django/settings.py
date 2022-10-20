@@ -13,6 +13,7 @@ from os.path import join
 from pathlib import Path
 from datetime import timedelta
 from buff_user.authentications import MySessionAuthentication
+from buffdvp_django.secret_settings import REDIS_URL, SECRET_KEY as _SECRET_KEY
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -21,7 +22,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-8j=b!yge^r3z@&q3kauph8pbg_9&x!eyvzi!a_l=v0xrm7p482'
+SECRET_KEY = _SECRET_KEY
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
@@ -145,7 +146,7 @@ SESSION_COOKIE_AGE = 1209600
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.redis.RedisCache',
-        'LOCATION': 'redis://:<your-password>@<your-ipport>',
+        'LOCATION': REDIS_URL,
         'TIMEOUT': 300,
         'OPTIONS': {
             'db': '10',
