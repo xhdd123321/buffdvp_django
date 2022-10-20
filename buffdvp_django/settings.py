@@ -24,9 +24,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-8j=b!yge^r3z@&q3kauph8pbg_9&x!eyvzi!a_l=v0xrm7p482'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['http://dvp.zhu-an.cn']
 
 # Application definition
 
@@ -145,7 +145,7 @@ SESSION_COOKIE_AGE = 1209600
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.redis.RedisCache',
-        'LOCATION': 'redis://:Fblr9ovO@123.57.150.240:6379',
+        'LOCATION': 'redis://:<your-password>@<your-ipport>',
         'TIMEOUT': 300,
         'OPTIONS': {
             'db': '10',
